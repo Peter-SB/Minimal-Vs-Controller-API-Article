@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Shared.Data;
 
 namespace MinimalApi;
@@ -9,9 +10,35 @@ public class Program
     {
 
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddDbContext<localDb>(opt => opt.UseInMemoryDatabase("MinimalDB"));
+
+        builder.Services.AddDbContext<localDb>(opt => opt.UseSqlite("DataSource=:memory:"));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+        });
+
+        // ---------
         var app = builder.Build();
+        // ---------
+
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
+            dbContext.Database.OpenConnection();   // Manually open the connection
+            dbContext.Database.Migrate();         // Apply migrations to create the schema
+            dbContext.Database.EnsureCreated();    // Create the schema in the in-memory database
+        }
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
+        }
 
         var songItems = app.MapGroup("/songs");
         var playlistItems = app.MapGroup("/playlists");
@@ -30,6 +57,7 @@ public class Program
         playlistItems.MapDelete("/{id}", DeletePlaylist);
 
         app.Run();
+
 
         static async Task<IResult> GetAllSongs(localDb db)
         {
