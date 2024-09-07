@@ -53,7 +53,6 @@ public class Program
         playlistItems.MapGet("/{id}", GetPlaylist);
         playlistItems.MapPost("/", SavePlaylist);
         playlistItems.MapPut("/{id}", UpdatePlaylist);
-        playlistItems.MapPost("/{playlistId}/songs/{songId}", AddSongToPlaylist);
         playlistItems.MapDelete("/{id}", DeletePlaylist);
 
         app.Run();
@@ -118,7 +117,7 @@ public class Program
 
         static async Task<IResult> GetPlaylist(int id, localDb db)
         {
-            return await db.Playlists.Include(p => p.Songs).FirstOrDefaultAsync(p => p.Id == id)
+            return await db.Playlists.FirstOrDefaultAsync(p => p.Id == id)
                 is Playlist playlist
                     ? TypedResults.Ok(playlist)
                     : TypedResults.NotFound();
@@ -134,7 +133,7 @@ public class Program
 
         static async Task<IResult> UpdatePlaylist(int id, Playlist inputPlaylist, localDb db)
         {
-            var playlist = await db.Playlists.Include(p => p.Songs).FirstOrDefaultAsync(p => p.Id == id);
+            var playlist = await db.Playlists.FirstOrDefaultAsync(p => p.Id == id);
 
             if (playlist is null) return TypedResults.NotFound();
 
@@ -143,26 +142,8 @@ public class Program
 
             await db.SaveChangesAsync();
 
-            return TypedResults.NoContent();
+            return TypedResults.Ok(playlist);
         }
-
-        static async Task<IResult> AddSongToPlaylist(int playlistId, int songId, localDb db)
-        {
-            var playlist = await db.Playlists.Include(p => p.Songs).FirstOrDefaultAsync(p => p.Id == playlistId);
-            if (playlist == null) return TypedResults.NotFound();
-
-            var song = await db.Songs.FindAsync(songId);
-            if (song == null) return TypedResults.NotFound();
-
-            if (!playlist.Songs.Any(s => s == songId))
-            {
-                playlist.Songs.Add(song.Id);
-                await db.SaveChangesAsync();
-            }
-
-            return TypedResults.NoContent();
-        }
-
 
         static async Task<IResult> DeletePlaylist(int id, localDb db)
         {
