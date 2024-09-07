@@ -59,6 +59,8 @@ public class Program
         app.Run();
 
 
+        // --------- Song Functions ---------
+
         static async Task<IResult> GetAllSongs(localDb db)
         {
             return TypedResults.Ok(await db.Songs.ToArrayAsync());
@@ -107,11 +109,11 @@ public class Program
             return TypedResults.NotFound();
         }
 
-        // ---------
+        // --------- Playlist Functions ---------
 
         static async Task<IResult> GetAllPlaylists(localDb db)
         {
-            return TypedResults.Ok(await db.Playlists.Include(p => p.Songs).ToArrayAsync());
+            return TypedResults.Ok(await db.Playlists.ToArrayAsync());
         }
 
         static async Task<IResult> GetPlaylist(int id, localDb db)

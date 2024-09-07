@@ -20,7 +20,7 @@ public class PlaylistsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Playlist>>> GetAllPlaylists()
     {
-        return await _db.Playlists.Include(p => p.Songs).ToListAsync();
+        return await _db.Playlists.ToListAsync();
     }
 
     [HttpGet("{id}")]
