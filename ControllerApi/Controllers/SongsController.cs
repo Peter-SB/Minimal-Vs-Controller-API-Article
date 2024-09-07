@@ -61,7 +61,7 @@ public class SongsController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        return NoContent();
+        return Ok(song);
     }
 
     [HttpDelete("{id}")]

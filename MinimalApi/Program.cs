@@ -94,7 +94,7 @@ public class Program
 
             await db.SaveChangesAsync();
 
-            return TypedResults.NoContent();
+            return TypedResults.Ok(song);
         }
 
         static async Task<IResult> DeleteSong(int id, localDb db)
@@ -106,7 +106,7 @@ public class Program
                 return TypedResults.NoContent();
             }
 
-            return TypedResults.NotFound();
+            return TypedResults.Ok();
         }
 
         // --------- Playlist Functions ---------

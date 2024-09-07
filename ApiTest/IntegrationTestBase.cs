@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Shared.Data;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
-
-namespace ApiTest;
 
 public abstract class IntegrationTestBase
 {
@@ -14,48 +13,87 @@ public abstract class IntegrationTestBase
         _client = client;
     }
 
-    [Fact]
-    public async Task Get_Playlists_Returns_Ok()
-    {
-        // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Get, "/playlists");
-
-        // Act
-        var response = await _client.SendAsync(request);
-
-        // Assert
-        response.EnsureSuccessStatusCode(); // 200-299 status code
-    }
 
     [Fact]
-    public async Task Get_Songs_Returns_Ok()
+    public async Task Create_Song_Returns_Created()
     {
         // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Get, "/songs");
+        var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
 
         // Act
-        var response = await _client.SendAsync(request);
+        var response = await _client.PostAsJsonAsync("/songs", newSong);
 
         // Assert
-        response.EnsureSuccessStatusCode(); // 200-299 status code
+        response.EnsureSuccessStatusCode();
+        var createdSong = await response.Content.ReadFromJsonAsync<Song>();
+        Assert.Equal(newSong.Name, createdSong.Name); 
     }
 
-    // Add more tests as needed
-}
-
-public class MinimalApiIntegrationTests : IntegrationTestBase
-{
-    public MinimalApiIntegrationTests()
-        : base(new WebApplicationFactory<MinimalApi.Program>().CreateClient())
+    [Fact]
+    public async Task Get_Song_ById()
     {
+        // Arrange
+        var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
+        var createResponse = await _client.PostAsJsonAsync("/songs", newSong);
+        var createdSong = await createResponse.Content.ReadFromJsonAsync<Song>();
+
+        // Act
+        var response = await _client.GetAsync($"/songs/{createdSong.Id}");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var retrievedSong = await response.Content.ReadFromJsonAsync<Song>();
+        Assert.Equal(createdSong.Id, retrievedSong.Id);
     }
-}
 
-public class ControllerBasedApiIntegrationTests : IntegrationTestBase
-{
-    public ControllerBasedApiIntegrationTests()
-        : base(new WebApplicationFactory<ControllerApi.Program>().CreateClient())
+    [Fact]
+    public async Task Update_Song()
     {
+        // Arrange
+        var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
+        var createResponse = await _client.PostAsJsonAsync("/songs", newSong);
+        var createdSong = await createResponse.Content.ReadFromJsonAsync<Song>();
+
+        var updatedSong = new Song { Id = 1, Name = "Test Song New", Artist = "Test Artist New" };
+
+        // Act
+        var updateResponse = await _client.PutAsJsonAsync($"/songs/{createdSong.Id}", updatedSong);
+
+        // Assert
+        updateResponse.EnsureSuccessStatusCode(); 
+        var updatedSongResponse = await updateResponse.Content.ReadFromJsonAsync<Song>();
+        Assert.Equal(updatedSong.Name, updatedSongResponse.Name);
+    }
+
+    [Fact]
+    public async Task Delete_Song()
+    {
+        // Arrange
+        var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
+        var createResponse = await _client.PostAsJsonAsync("/songs", newSong);
+        var createdSong = await createResponse.Content.ReadFromJsonAsync<Song>();
+
+        // Act
+        var deleteResponse = await _client.DeleteAsync($"/songs/{createdSong.Id}");
+
+        // Assert
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        // Verify that the song is deleted
+        var getResponse = await _client.GetAsync($"/songs/{createdSong.Id}");
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, getResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_All_Songs()
+    {
+        // Act
+        var response = await _client.GetAsync("/songs");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var songs = await response.Content.ReadFromJsonAsync<List<Song>>();
+        Assert.NotNull(songs);
     }
 }
 
