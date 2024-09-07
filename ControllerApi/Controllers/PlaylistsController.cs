@@ -20,13 +20,13 @@ public class PlaylistsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Playlist>>> GetAllPlaylists()
     {
-        return await _db.Playlists.Include(p => p.Songs).ToListAsync();
+        return await _db.Playlists.ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Playlist>> GetPlaylist(int id)
     {
-        var playlist = await _db.Playlists.Include(p => p.Songs).FirstOrDefaultAsync(p => p.Id == id);
+        var playlist = await _db.Playlists.FirstOrDefaultAsync(p => p.Id == id);
 
         if (playlist == null)
         {
@@ -48,7 +48,7 @@ public class PlaylistsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePlaylist(int id, Playlist inputPlaylist)
     {
-        var playlist = await _db.Playlists.Include(p => p.Songs).FirstOrDefaultAsync(p => p.Id == id);
+        var playlist = await _db.Playlists.FirstOrDefaultAsync(p => p.Id == id);
 
         if (playlist == null)
         {
@@ -60,25 +60,7 @@ public class PlaylistsController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        return NoContent();
-    }
-
-    [HttpPost("{playlistId}/songs/{songId}")]
-    public async Task<IActionResult> AddSongToPlaylist(int playlistId, int songId)
-    {
-        var playlist = await _db.Playlists.Include(p => p.Songs).FirstOrDefaultAsync(p => p.Id == playlistId);
-        if (playlist == null) return NotFound();
-
-        var song = await _db.Songs.FindAsync(songId);
-        if (song == null) return NotFound();
-
-        if (!playlist.Songs.Contains(songId))
-        {
-            playlist.Songs.Add(songId);
-            await _db.SaveChangesAsync();
-        }
-
-        return NoContent();
+        return Ok(playlist);
     }
 
     [HttpDelete("{id}")]
