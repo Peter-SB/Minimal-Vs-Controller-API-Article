@@ -11,7 +11,10 @@ public class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddDbContext<localDb>(opt => opt.UseSqlite("DataSource=:memory:"));
+        builder.Services.AddDbContext<localDb>(opt => {
+            opt.UseSqlite("Data Source=:memory:");
+        }, ServiceLifetime.Singleton); // Needed to keep the in memory database from being disposed
+
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddEndpointsApiExplorer();
@@ -20,16 +23,13 @@ public class Program
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
         });
 
-        // ---------
         var app = builder.Build();
-        // ---------
 
 
         using (var scope = app.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
             dbContext.Database.OpenConnection();   // Manually open the connection
-            dbContext.Database.Migrate();         // Apply migrations to create the schema
             dbContext.Database.EnsureCreated();    // Create the schema in the in-memory database
         }
 
