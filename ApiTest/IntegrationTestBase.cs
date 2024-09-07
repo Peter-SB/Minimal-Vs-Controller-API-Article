@@ -18,7 +18,8 @@ public abstract class IntegrationTestBase
 
 
     [Fact]
-    public async Task Create_Song()
+    [Trait("Category", "Song Endpoint Tests")]
+    public async Task Songs_Create_Song()
     {
         // Arrange
         var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
@@ -33,7 +34,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Get_Song_ById()
+    [Trait("Category", "Song Endpoint Tests")]
+    public async Task Songs_Get_Song_ById()
     {
         // Arrange
         var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
@@ -50,7 +52,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Update_Song()
+    [Trait("Category", "Song Endpoint Tests")]
+    public async Task Songs_Update_Song()
     {
         // Arrange
         var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
@@ -69,7 +72,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Delete_Song()
+    [Trait("Category", "Song Endpoint Tests")]
+    public async Task Songs_Delete_Song()
     {
         // Arrange
         var newSong = new Song { Id = 1, Name = "Test Song", Artist = "Test Artist" };
@@ -88,7 +92,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Get_All_Songs()
+    [Trait("Category", "Song Endpoint Tests")]
+    public async Task Songs_Get_All_Songs()
     {
         // Act
         var response = await _client.GetAsync("/songs");
@@ -104,7 +109,8 @@ public abstract class IntegrationTestBase
 
 
     [Fact]
-    public async Task Create_Playlist()
+    [Trait("Category", "Playlist Endpoint Tests")]
+    public async Task Playlists_Create_Playlist()
     {
         // Arrange
         var newPlaylist = new Playlist { Id = 1, Name = "Test Playlist", Songs = new List<int> { 1, 2 } };
@@ -120,7 +126,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Get_Playlist_ById()
+    [Trait("Category", "Playlist Endpoint Tests")]
+    public async Task Playlists_Get_Playlist_ById()
     {
         // Arrange
         var newPlaylist = new Playlist { Id = 1, Name = "Test Playlist", Songs = new List<int> { 1, 2 } };
@@ -137,7 +144,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Update_Playlist()
+    [Trait("Category", "Playlist Endpoint Tests")]
+    public async Task Playlists_Update_Playlist()
     {
         // Arrange
         var newPlaylist = new Playlist { Id = 1, Name = "Test Playlist", Songs = new List<int> { 1, 2 } };
@@ -157,7 +165,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Delete_Playlist()
+    [Trait("Category", "Playlist Endpoint Tests")]
+    public async Task Playlists_Delete_Playlist()
     {
         // Arrange
         var newPlaylist = new Playlist { Id = 1, Name = "Test Playlist", Songs = new List<int> { 1, 2 } };
@@ -176,7 +185,8 @@ public abstract class IntegrationTestBase
     }
 
     [Fact]
-    public async Task Get_All_Playlists()
+    [Trait("Category", "Playlist Endpoint Tests")]
+    public async Task Playlists_Get_All_Playlists()
     {
         // Act
         var response = await _client.GetAsync("/playlists");
