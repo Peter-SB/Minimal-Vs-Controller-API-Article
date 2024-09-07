@@ -16,7 +16,6 @@ public class Program
         }, ServiceLifetime.Singleton);  // Needed to keep the in memory database from being disposed
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {

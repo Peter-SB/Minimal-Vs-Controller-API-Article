@@ -1,7 +1,5 @@
 ﻿using Shared.Data;
-using System.Net.Http;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Xunit;
 
 public abstract class IntegrationTestBase
