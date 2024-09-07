@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Shared.Data;
 
 
@@ -14,12 +15,12 @@ public class Program
             opt.UseSqlite("Data Source=:memory:");
         }, ServiceLifetime.Singleton); // Needed to keep the in memory database from being disposed
 
-        // Add services to the container.
-
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Controller Api Demo", Version = "v1" });
+        });
 
 
         var app = builder.Build();
@@ -27,21 +28,19 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
-            dbContext.Database.OpenConnection();   // Manually open the connection
-            dbContext.Database.EnsureCreated();    // Create the schema in the in-memory database
+            dbContext.Database.OpenConnection();
+            dbContext.Database.EnsureCreated();  // Create the schema in the in-memory database
         }
 
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
         app.MapControllers();
 
         app.Run();

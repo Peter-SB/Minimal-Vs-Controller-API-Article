@@ -13,14 +13,14 @@ public class Program
 
         builder.Services.AddDbContext<localDb>(opt => {
             opt.UseSqlite("Data Source=:memory:");
-        }, ServiceLifetime.Singleton); // Needed to keep the in memory database from being disposed
+        }, ServiceLifetime.Singleton);  // Needed to keep the in memory database from being disposed
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minimal Api Demo", Version = "v1" });
         });
 
         var app = builder.Build();
@@ -29,8 +29,8 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
-            dbContext.Database.OpenConnection();   // Manually open the connection
-            dbContext.Database.EnsureCreated();    // Create the schema in the in-memory database
+            dbContext.Database.OpenConnection();
+            dbContext.Database.EnsureCreated();  // Create the schema in the in-memory database
         }
 
         if (app.Environment.IsDevelopment())
@@ -59,6 +59,7 @@ public class Program
 
 
         // --------- Song Functions ---------
+
 
         static async Task<IResult> GetAllSongs(localDb db)
         {
@@ -108,7 +109,9 @@ public class Program
             return TypedResults.Ok();
         }
 
+
         // --------- Playlist Functions ---------
+
 
         static async Task<IResult> GetAllPlaylists(localDb db)
         {

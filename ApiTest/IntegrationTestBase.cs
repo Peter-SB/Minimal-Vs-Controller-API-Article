@@ -13,7 +13,9 @@ public abstract class IntegrationTestBase
         _client = client;
     }
 
-    // ---- Song Tests ----
+
+    // --------- Song Tests ---------
+
 
     [Fact]
     public async Task Create_Song()
@@ -80,7 +82,7 @@ public abstract class IntegrationTestBase
         // Assert
         Assert.Equal(System.Net.HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-        // Verify that the song is deleted
+        // Verify
         var getResponse = await _client.GetAsync($"/songs/{createdSong.Id}");
         Assert.Equal(System.Net.HttpStatusCode.NotFound, getResponse.StatusCode);
     }
@@ -97,7 +99,9 @@ public abstract class IntegrationTestBase
         Assert.NotNull(songs);
     }
 
-    // ---- Playlist Tests ----
+
+    // --------- Playlist Tests ---------
+
 
     [Fact]
     public async Task Create_Playlist()
@@ -166,7 +170,7 @@ public abstract class IntegrationTestBase
         // Assert
         Assert.Equal(System.Net.HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-        // Verify that the playlist is deleted
+        // Verify
         var getResponse = await _client.GetAsync($"/playlists/{createdPlaylist.Id}");
         Assert.Equal(System.Net.HttpStatusCode.NotFound, getResponse.StatusCode);
     }
