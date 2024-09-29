@@ -166,3 +166,104 @@ static async Task<IResult> DeleteSong(int id, localDb db)
     return TypedResults.Ok();
 }
 ```
+
+## Extending Our Minimal CRUD API’s Functionality
+
+Now, for demonstrative purposes, let's extend the functionality of our API. Now, we would like to add playlists and allow songs to be added to playlists. One of the benefits of using a Minimal APIs approach is that it’s easy to tack on additional functionality without much effort.
+
+### Data Structure
+
+Let's start by adding the playlist data structure for our playlist entity and endpoints. This class will represent our Playlist object
+
+```csharp
+public class Playlist
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+    public required List<int> Songs { get; set; } = new List<int>();
+}
+```
+
+The line of code for the database should already be in the localDb class
+
+### Program.cs
+
+Just like we did with songs, we map our playlist routes for clean organization
+
+```csharp
+var playlistItems = app.MapGroup("/playlists");
+
+playlistItems.MapGet("/", GetAllPlaylists);
+playlistItems.MapGet("/{id}", GetPlaylist);
+playlistItems.MapPost("/", SavePlaylist);
+playlistItems.MapPut("/{id}", UpdatePlaylist);
+playlistItems.MapPost("/{playlistId}/songs/{songId}", AddSongToPlaylist);
+playlistItems.MapDelete("/{id}", DeletePlaylist);
+```
+
+Here are our function definitions for our new playlist CRUD endpoints
+
+```csharp
+static async Task<IResult> GetAllPlaylists(localDb db)
+{
+    return TypedResults.Ok(await db.Playlists.ToArrayAsync());
+}
+
+static async Task<IResult> GetPlaylist(int id, localDb db)
+{
+    return await db.Playlists.FirstOrDefaultAsync(p => p.Id == id)
+        is Playlist playlist
+            ? TypedResults.Ok(playlist)
+            : TypedResults.NotFound();
+}
+
+static async Task<IResult> SavePlaylist(Playlist playlist, localDb db)
+{
+    db.Playlists.Add(playlist);
+    await db.SaveChangesAsync();
+
+    return TypedResults.Created($"/playlists/{playlist.Id}", playlist);
+}
+
+static async Task<IResult> UpdatePlaylist(int id, Playlist inputPlaylist, localDb db)
+{
+    var playlist = await db.Playlists.FirstOrDefaultAsync(p => p.Id == id);
+
+    if (playlist is null) return TypedResults.NotFound();
+
+    playlist.Name = inputPlaylist.Name;
+    playlist.Songs = inputPlaylist.Songs;
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(playlist);
+}
+
+static async Task<IResult> DeletePlaylist(int id, localDb db)
+{
+    if (await db.Playlists.FindAsync(id) is Playlist playlist)
+    {
+        db.Playlists.Remove(playlist);
+        await db.SaveChangesAsync();
+        return TypedResults.NoContent();
+    }
+
+    return TypedResults.NotFound();
+}
+```
+
+We have now quickly set up a CRUD API for adding songs to an SQLite database and adding playlists of songs too. While the setup was very quick and we didn't need much code to get started, as the functionality of our program grew our Program.cs file also grew and is now looking quite large. A potential version control (Git) nightmare. If you wanted to add more features or refactor this code, having all your logic in one file would make maintenance more challenging. This approach works well when your project is small, but as you scale, it can become more difficult to manage.
+
+### Pros
+
+- **Faster setup:** With Minimal APIs, you can get your application up and running much faster compared to the more rigid structure of Controller-based APIs. You can skip the boilerplate code and can define routes and logic in a few lines.
+- **Lightweight for small apps:** For applications where performance and minimal overhead are essential, such as microservices, Minimal APIs are a great fit. You have access to a lot of the same features available in Controller-based APIs, but without the additional setup.
+- **Readable for simple use cases:** When dealing with just a few endpoints, having everything defined in one place can make the code easier to follow at first glance.
+
+### Cons
+
+- **Difficulty in scaling and less structure:** As your application grows and you add more functionality, having all routes, logic, and dependencies handled in one file becomes unmanageable. Refactoring becomes harder, and keeping track of various endpoints and services can lead to a "spaghetti code" situation.
+- **Harder Dependency Injection:** Minimal APIs don’t handle dependency injection as seamlessly as Controller-based APIs. While you can inject services into endpoint handlers, it gets tricky when you need more complex dependencies. You might need to access the service provider manually or implement custom middleware, which can introduce unnecessary complexity.
+- **Limited middleware capabilities:** Minimal APIs support basic middleware, but for more advanced scenarios, like custom authentication, authorization, or complex request pipelines, Controller-based APIs might be a better fit.
+
+# Controller Based API
