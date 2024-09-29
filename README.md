@@ -7,7 +7,31 @@ In this article we will walk through designing a simple CRUD RESTful API, using 
 The code for this demo can be found here: https://github.com/Peter-SB/Minimal-Vs-Controller-API-Article
 
 ---
-
+- [Comparing Minimal and Controller-Based APIs in ASP.NET](#comparing-minimal-and-controller-based-apis-in-aspnet)
+- [Minimal API](#minimal-api)
+  * [Simple CRUD API](#simple-crud-api)
+    + [Song Data Structure](#song-data-structure)
+    + [In Memory SQLite Database](#in-memory-sqlite-database)
+    + [Program.cs](#programcs)
+  * [Extending Our Minimal CRUD API Functionality](#extending-our-minimal-crud-api-functionality)
+    + [Data Structure](#data-structure)
+    + [Program.cs](#programcs-1)
+    + [Pros](#pros)
+    + [Cons](#cons)
+- [Controller Based API](#controller-based-api)
+  * [Upgrading To Controller Base API](#upgrading-to-controller-base-api)
+  * [Upgrading to a Controller-Based API](#upgrading-to-a-controller-based-api)
+    + [Program.cs](#programcs-2)
+    + [Controllers](#controllers)
+    + [Pros](#pros)
+    + [Cons](#cons)
+- [Testing](#testing)
+  * [Manual Testing With Swagger](#manual-testing-with-swagger)
+  * [Integration vs Unit Testing](#integration-vs-unit-testing)
+  * [Integration Test](#integration-test)
+- [Quick Conclusion](#quick-conclusion)
+- [Lessons I Learned](#lessons-i-learned)
+- [References](#references)
 ---
 
 # Minimal API
@@ -59,7 +83,7 @@ In the first section of our Program.cs file, we set up the web app using WebAppl
 
 The `builder.Services` gives access to the `IServiceCollection`, which is used to register services for dependency injection.
 
-```jsx
+```csharp
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,7 +93,7 @@ Here is where we set up our SQLite database.
 
 This adds our `localDb` context to the dependency injection container and sets it up to use it in-memory.
 
-```jsx
+```csharp
 builder.Services.AddDbContext <
   localDb >
   ((opt) => {
@@ -171,7 +195,7 @@ static async Task<IResult> DeleteSong(int id, localDb db)
 }
 ```
 
-## Extending Our Minimal CRUD API’s Functionality
+## Extending Our Minimal CRUD API Functionality
 
 Now, for demonstrative purposes, let's extend the functionality of our API. Now, we would like to add playlists and allow songs to be added to playlists. One of the benefits of using a Minimal APIs approach is that it’s easy to tack on additional functionality without much effort.
 
@@ -508,13 +532,13 @@ public class PlaylistsController : ControllerBase
 
 With a bit more setup, the controller-based approach offers better separation of concerns, making it easier to write and maintain APIs, especially as they grow in complexity.
 
-### Pros:
+### Pros
 
 - **Neater Code Organization:** Controllers group related endpoints together, making the code easier to navigate, particularly in larger applications.
 - **Scalability:** Controller-based APIs handle larger projects with numerous endpoints more effectively, providing a structured approach that’s ideal for enterprise-level systems.
 - **Built-In Routing and Features:** Unlike Minimal APIs, controllers come with built-in routing, validation, and model binding, reducing the need for custom configurations and making the code more maintainable as the project grows.
 
-### Cons:
+### Cons
 
 - **More Boilerplate Code:** The controller-based approach requires additional setup, such as defining controller classes and attributes, leading to more boilerplate.
 - **Overhead for Small Projects:** For small APIs, the extra layers and setup may be unnecessary when a Minimal API could handle the same tasks with less code.
@@ -527,7 +551,7 @@ Swagger offers a user-friendly UI for documenting and interacting with your API,
 
 You can add Swagger by modifying the `Program.cs` file as follows:
 
-```jsx
+```csharp
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -547,7 +571,7 @@ if (app.Environment.IsDevelopment())
 
 With this setup, Swagger will generate a UI at `/swagger` where you can interact with the API, making it much easier to manually test the endpoints and see live documentation. This is especially useful for early stages of development.
 
-## Integration vs. Unit Testing:
+## Integration vs Unit Testing:
 
 A quick note on the difference between integration testing and unit testing.
 
@@ -562,7 +586,7 @@ Since we have two APIs that should functionally work the same, we can write a si
 
 We’ll use `WebApplicationFactory` from `Microsoft.AspNetCore.Mvc.Testing` to create a test server and generate `HttpClient` instances. The `WebApplicationFactory` class mimics how the application is run in production, setting up a real test host, middleware, and dependency injection. Each specific API test class (Minimal and Controller-based) will pass its own `WebApplicationFactory` into the base class, allowing the same set of tests to be run against different implementations.
 
-```jsx
+```csharp
 using Shared.Data;
 using System.Net.Http.Json;
 using Xunit;
@@ -618,7 +642,7 @@ public abstract class IntegrationTestBase
 
 Now that we have a base class for integration testing, we can create separate test classes for the Minimal API and the Controller-based API:
 
-```jsx
+```csharp
 public class MinimalApiIntegrationTests : IntegrationTestBase
 {
     public MinimalApiIntegrationTests()
@@ -651,7 +675,7 @@ It is always valuable to make time to reflect on what has been learned and pract
 - **Singletons!!** - The amount of time I spent while writing this article just battling an SQLite database that didn't work was exhausting. Finally, I tracked down that the database was not connected while running my requests, and then only after that did I realize that my database was being disposed off. `ServiceLifetime.Singleton` stopped it being binned and fixed all my problems. This brings me onto my last point
 - **Debugging and Docs Practice:** A large part of being a software developer is debugging—both in using the tools in your IDE to debug your code and in researching and solving problems. This article gave me great practice in breaking down problems, testing different solutions, and pushing through challenges. Additionally, reading documentation is also a core skill that always benefits from practice. Researching and reading docs, other articles, and forum posts for this article was good practice ability to find reliable sources and quickly locate the information I need.
 
-# References:
+# References
 
 1. Choose between controller-based APIs and minimal APIs - Microsoft: [https://learn.microsoft.com/en-us/aspnet/core/fundamentals/apis?view=aspnetcore-8.0](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/apis?view=aspnetcore-8.0)
 2. Controllers vs Minimal APIs - Lumythys: [https://www.reddit.com/r/dotnet/comments/17t27cv/comment/k8tzgot/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button](https://www.reddit.com/r/dotnet/comments/17t27cv/comment/k8tzgot/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
