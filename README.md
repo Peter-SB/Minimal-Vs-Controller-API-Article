@@ -531,21 +531,21 @@ With a bit more setup, the controller-based approach offers better separation of
 ### Pros
 
 - **Neater Code Organization:** Controllers group related endpoints together, making the code easier to navigate, particularly in larger applications.
-- **Scalability:** Controller-based APIs handle larger projects with numerous endpoints more effectively, providing a structured approach that’s ideal for enterprise-level systems.
-- **Built-In Routing and Features:** Unlike Minimal APIs, controllers come with built-in routing, validation, and model binding, reducing the need for custom configurations and making the code more maintainable as the project grows.
+- **Scalability:** Controller-based APIs handle larger projects with numerous endpoints more effectively, providing a structured approach that’s ideal for enterprise/business systems.
+- **Built-In Routing and Features:** Unlike Minimal APIs, controllers come with built-in routing, validation, and model binding, reducing the need for custom configurations and making code more maintainable as the project grows.
 
 ### Cons
 
 - **More Boilerplate Code:** The controller-based approach requires additional setup, such as defining controller classes and attributes, leading to more boilerplate.
-- **Overhead for Small Projects:** For small APIs, the extra layers and setup may be unnecessary when a Minimal API could handle the same tasks with less code.
+- **Overhead for Small Projects:** This Biolerplate code, for small APIs, adds extra layers and setup which may be unnecessary when a Minimal API could handle the same tasks with less code.
 
 # Testing
 
 ## Manual Testing With Swagger
 
-Swagger offers a user-friendly UI for documenting and interacting with your API, making it useful for quick manual testing.
+Swagger offers a user friendly UI for documenting and interacting with your API, making it useful for quick manual testing.
 
-You can add Swagger by modifying the `Program.cs` file as follows:
+We can add Swagger to our code by modifying the `Program.cs` file as follows:
 
 ```csharp
 builder.Services.AddControllers();
@@ -565,7 +565,7 @@ if (app.Environment.IsDevelopment())
 }
 ```
 
-With this setup, Swagger will generate a UI at `/swagger` where you can interact with the API, making it much easier to manually test the endpoints and see live documentation. This is especially useful for early stages of development.
+With this setup, Swagger will generate a UI at `/swagger` where we can interact with the API, making it much easier to manually test the endpoints and see live documentation. This is especially useful for early stages of development.
 
 ## Integration vs Unit Testing:
 
