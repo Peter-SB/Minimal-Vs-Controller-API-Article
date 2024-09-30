@@ -280,7 +280,7 @@ static async Task<IResult> DeletePlaylist(int id, localDb db)
 }
 ```
 
-We have now quickly set up a CRUD API for adding songs to an SQLite database and adding playlists of songs too. While the setup was very quick and we didn't need much code to get started, as the functionality of our program grew our Program.cs file also grew and is now looking quite large. A potential version control (Git) nightmare. If you wanted to add more features or refactor this code, having all your logic in one file would make maintenance more challenging. This approach works well when your project is small, but as you scale, it can become more difficult to manage.
+We have now quickly set up a CRUD API for adding songs to an SQLite database and adding playlists of songs too. While the setup was very quick and we didn't need much code to get started, as the functionality of our program grew our `Program.cs` file also grew and is now looking quite large. A potential version control (Git) nightmare. If you wanted to add more features or refactor this code, having all your logic in one file would make maintenance more challenging. This approach works well when your project is small, but as you scale, it can become more difficult to manage.
 
 ### Pros
 
