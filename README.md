@@ -296,10 +296,6 @@ We have now quickly set up a CRUD API for adding songs to an SQLite database and
 
 # Controller Based API
 
-## Upgrading To Controller Base API
-
-Now that we've demonstrated a simple Minimal API, let's rewrite the same API using a controller-based approach.
-
 ## Upgrading to a Controller-Based API
 
 While Minimal APIs are great for small projects with straightforward requirements, as your application grows in complexity we benefit from a more structured approach with more controll. This is where Controller-Based APIs come in.
