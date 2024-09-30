@@ -567,12 +567,12 @@ if (app.Environment.IsDevelopment())
 
 With this setup, Swagger will generate a UI at `/swagger` where we can interact with the API, making it much easier to manually test the endpoints and see live documentation. This is especially useful for early stages of development.
 
-## Integration vs Unit Testing:
+## Unit vs Integration Testing:
 
-A quick note on the difference between integration testing and unit testing.
+A quick note on the difference between unit testing and integration testing.
 
-- **Integration Tests**: These tests verify that different parts of the application work together as expected. They check the interaction between components, such as databases, services, and the HTTP request pipeline.
-- **Unit Tests**: These focus on individual components or methods, ensuring they work in isolation from the rest of the system. They usually focus on testing single functions with mocked services.
+- **Unit Tests**: These focus on individual components or methods, ensuring they work in isolation from the rest of the program. They usually focus on testing single functions with mocked services.
+- **Integration Tests**: These tests verify that different parts of the application work together as expected. They check the interaction between our components, such as databases, services, and HTTP requests.
 
 ## Integration Test
 
