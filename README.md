@@ -2,7 +2,7 @@
 
 When building APIs in ASP.NET Core, there are two primary approaches: **Minimal APIs** and **Controller-Based APIs**. Each has its own advantages, and choosing the right one depends on the specific project needs. Minimal APIs are ideal for lightweight, small-scale applications where simplicity and speed are important. On the other hand, Controller-based APIs provide more controll and separation of concerns, which is potentially needed for larger applications with more complex requirements.
 
-In this article we will walk through designing a simple CRUD RESTful API, using first the simpler approach, minimal API, then watching how as we expand the functionality of the API, a controller base design could be preferable.
+In this article we will walk through designing a simple CRUD RESTful API, using first the simpler approach, minimal API, then watching how as we expand the functionality of the API, a controller base API design could be preferable.
 
 The code for this demo can be found here: https://github.com/Peter-SB/Minimal-Vs-Controller-API-Article
 
@@ -44,7 +44,7 @@ Let’s dive into our example.
 
 ## Simple CRUD API
 
-We will start our example by building a simple CRUD API to store songs, and then later playlists, in an inmemory SQLite database. We are going with an SQLlite in-memory database since it's lightweight, serverless, and perfect for our small-scale demonstrative purposes.
+We will start our example by building a simple CRUD API to store and retrieve songs, and then later playlists, in an inmemory SQLite database. We are going with an SQLlite in-memory database since it's lightweight, serverless, and perfect for our small-scale demonstrative purposes.
 
 ### Song Data Structure
 
@@ -79,7 +79,7 @@ public class localDb : DbContext
 
 ### Program.cs
 
-In the first section of our Program.cs file, we set up the web app using WebApplication.CreateBuilder to initialize a new instance of the WebApplicationBuilder class with pre-configured defaults. We also add the in-memory SQLite database.
+In the first section of our `Program.cs` file, we set up the web app using `WebApplication.CreateBuilder` to initialize a new instance of the `WebApplicationBuilder` class with pre-configured defaults. 
 
 The `builder.Services` gives access to the `IServiceCollection`, which is used to register services for dependency injection.
 
@@ -89,9 +89,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 ```
 
-Here is where we set up our SQLite database.
-
-This adds our `localDb` context to the dependency injection container and sets it up to use it in-memory.
+Here is where we set up our SQLite database. This adds our `localDb` context to the dependency injection container and sets it up to use it in-memory.
 
 ```csharp
 builder.Services.AddDbContext <
@@ -102,7 +100,7 @@ builder.Services.AddDbContext <
   ServiceLifetime.Singleton); // Needed to keep the in memory database from being disposed
 ```
 
-The `ServiceLifetime.Singleton` is very important, it ensures that the database context lives for the entire lifetime of the application. Without this, the in-memory database would get disposed of after each request, meaning you'd lose all data between requests. Believe me, I found this out the hard way.
+The `ServiceLifetime.Singleton` is very important, it ensures that the database context lives for the entire lifetime of the application. Without this, the in-memory database would get disposed of after each request, meaning you'd lose all data between requests. Believe me, I found this out the hard way!
 
 `builder.Build()` finalizes the `WebApplication` configurations and makes it ready to handle requests.
 
@@ -129,7 +127,7 @@ songItems.MapPut("/{id}", UpdateSong);
 songItems.MapDelete("/{id}", DeleteSong);
 ```
 
-By grouping endpoints like this, we make your code cleaner and easier to maintain, especially as your project grows. While Minimal APIs allow you to define routes inline, organizing them with `MapGroup` helps us keep the structure logical and scalable.
+By grouping endpoints like this, we make our code cleaner and easier to maintain, especially as our project grows. While Minimal APIs allow you to define routes inline, organizing them with `MapGroup` helps us keep the structure logical and scalable.
 
 Finally, we start the web API and tell it to start listening for incoming HTTP requests. After starting the API we need to initialize our SQLite database and then ensure its been created.
 
@@ -197,7 +195,7 @@ static async Task<IResult> DeleteSong(int id, localDb db)
 
 ## Extending Our Minimal CRUD API Functionality
 
-Now, for demonstrative purposes, let's extend the functionality of our API. Now, we would like to add playlists and allow songs to be added to playlists. One of the benefits of using a Minimal APIs approach is that it’s easy to tack on additional functionality without much effort.
+Now, for demonstrative purposes, let's extend the functionality of our API. Now we would like to add playlists and allow songs to be added to playlists. One of the benefits of using a Minimal APIs approach is that it’s easy to tack on additional functionality without much effort.
 
 ### Data Structure
 
@@ -212,7 +210,7 @@ public class Playlist
 }
 ```
 
-The line of code for the database should already be in the localDb class
+(The line of code for the database should already be in the localDb class.)
 
 ### Program.cs
 
@@ -290,7 +288,7 @@ We have now quickly set up a CRUD API for adding songs to an SQLite database and
 
 ### Cons
 
-- **Difficulty in scaling and less structure:** As your application grows and you add more functionality, having all routes, logic, and dependencies handled in one file can become quite unmanageable. Refactoring becomes harder, and keeping track of various endpoints and services can lead to spaghetti code.
+- **Difficulty in scaling and less structure:** As your application grows and you add more functionality, having all routes, logic, and dependencies handled in one file can become quite unmanageable. Refactoring becomes harder, and keeping track of various endpoints and services can lead to smelly spaghetti code.
 - **Harder Dependency Injection:** Minimal APIs don’t handle dependency injection as seamlessly as Controller-based APIs. While you can inject services into endpoint handlers, it gets tricky when you need more complex dependencies. You might need to access the service provider manually or implement custom middleware, which can be unnecessarily complex.
 - **Limited middleware capabilities:** Minimal APIs support basic middleware, but for more complex situations, like custom authentication, authorization, or complex request pipelines, Controller-based APIs might be a better choice.
 
@@ -298,9 +296,9 @@ We have now quickly set up a CRUD API for adding songs to an SQLite database and
 
 ## Upgrading to a Controller-Based API
 
-While Minimal APIs are great for small projects with straightforward requirements, as your application grows in complexity we benefit from a more structured approach with more controll. This is where Controller-Based APIs come in.
+While Minimal APIs are great for small projects with straightforward requirements, we've seen how as your application grows in complexity we would benefit from a more structured approach with more controll. This is where Controller-Based APIs come in.
 
-Controller-based APIs follow the clasical MVC (Model-View-Controller) pattern, giving you a clear separation of concerns by isolating the logic that handles HTTP requests (called the controllers) from the rest of your application. This approach is especially useful when you're dealing with larger applications, as it makes your codebase easier to organize and maintain. With this controllers-based approach, you also get built-in support for features like routing, validation, and model binding, which can make development more efficient as your API expands.
+Controller-based APIs follow the clasical MVC (Model-View-Controller) pattern, giving you a clear separation of concerns by separating the logic that handles HTTP requests (called the controllers) from the rest of your application. This approach is especially useful when you're dealing with larger applications, as it makes your codebase easier to organize and maintain. With this controllers-based approach, you also get built-in support for features like routing, validation, and model binding, which can make development more efficient as your API expands.
 
 Now that we’ve demonstrated a Minimal API, let's see how switching to a controller-based design compares with the more structured approach.
 
@@ -354,9 +352,9 @@ Now `[Route("/[controller]")]` attribute sets the URL prefixes. The `[controller
 
 The `[ApiController]` attribute marks the class as an API controller, enabling features like automatic model validation and binding errors.
 
-In the class constructor localDb is taken as a parameter provided by dependancy injection.
+In the class constructor `localDb` is taken as a parameter provided by dependancy injection.
 
-Lastly, notice how the function attributes like `[HttpGet]`, `[HttpPost]`, etc… specify the HTTP methods the controller actions should respond to.
+Lastly, notice how the function attributes like `[HttpGet]`, `[HttpPost]`, etc… denote the HTTP methods the controller actions should respond to.
 
 ```csharp
 using Microsoft.AspNetCore.Mvc;
@@ -530,7 +528,7 @@ With a bit more setup, the controller-based approach offers better separation of
 
 ### Pros
 
-- **Neater Code Organization:** Controllers group related endpoints together, making the code easier to navigate, particularly in larger applications.
+- **Neater Code Organization:** Controller approach group related endpoints together, making the code easier to navigate, particularly in larger applications.
 - **Scalability:** Controller-based APIs handle larger projects with numerous endpoints more effectively, providing a structured approach that’s ideal for enterprise/business systems.
 - **Built-In Routing and Features:** Unlike Minimal APIs, controllers come with built-in routing, validation, and model binding, reducing the need for custom configurations and making code more maintainable as the project grows.
 
@@ -571,14 +569,14 @@ With this setup, Swagger will generate a UI at `/swagger` where we can interact 
 
 A quick note on the difference between unit testing and integration testing.
 
-- **Unit Tests**: These focus on individual components or methods, ensuring they work in isolation from the rest of the program. They usually focus on testing single functions with mocked services.
-- **Integration Tests**: These tests verify that different parts of the application work together as expected. They check the interaction between our components, such as databases, services, and HTTP requests.
+- **Unit Tests**: These focus on individual components or methods, making sure they work in isolation from the rest of the program. They usually focus on testing single functions with mocked services.
+- **Integration Tests**: These tests verify that different parts of the application, "multiple units" if you will, work together as expected. They check the interaction between our components, such as databases, services, and HTTP requests.
 
 ## Integration Test
 
 No code is complete without some good unit or integration tests to quickly and repeatably ensure that your API works as expected and you’ve not introduced any bugs.
 
-Since we have two APIs that should functionally work the same, we can write a single set of integration tests to test both. We'll write these tests in a base test class, and implement specific test classes for each API. This structure allows us to avoid duplicating test logic. The base class will contain the core test logic, and each API will pass its own `HttpClient` to the base class for execution. By doing this, we ensure that both the Minimal and Controller-based APIs go through the same tests, confirming that they behave identically.
+Since we have two APIs that should functionally work the same, we can write a single set of integration tests to test both. We'll write these tests in a base test class, and implement specific test classes for each API. This structure allows us to avoid duplicating test logic. The base class will contain the core test logic, and each API will pass its own `HttpClient` to the base class for testing. By doing this, we ensure that both the Minimal and Controller-based APIs go through the same tests, confirming that they work identically.
 
 We’ll use `WebApplicationFactory` from `Microsoft.AspNetCore.Mvc.Testing` to create a test server and generate `HttpClient` instances. The `WebApplicationFactory` class mimics how the application is run in production, setting up a real test host, middleware, and dependency injection. Each specific API test class (Minimal and Controller-based) will pass its own `WebApplicationFactory` into the base class, allowing the same set of tests to be run against different implementations.
 
@@ -659,7 +657,7 @@ public class ControllerBasedApiIntegrationTests : IntegrationTestBase
 
 # Quick Conclusion
 
-We've now explored two different approaches for building APIs in [ASP.NET](http://asp.net/) Core. Minimal APIs as demonstrated can be more useful for smaller applications or microservices where speed and simplicity are needed. However, as we've seen, as our program grew the lack of structure and separation of concerns can lead to clutter in `Program.cs`, and managing all the endpoints in one file can become challenging.
+We've now explored two different approaches for building APIs in ASP.NET Core. Minimal APIs, as demonstrated, can be more useful for smaller applications or microservices where speed and simplicity are needed. However, as we've seen, as our program grew the lack of structure and separation of concerns can lead to clutter in `Program.cs`, and managing all the endpoints in one file can become challenging.
 
 We’ve also seen how Controller-Based APIs are more structured and I’ve explained how their built-in support for more advanced features can make them a better choice for larger applications that may need to scale over time.
 
@@ -667,9 +665,9 @@ We’ve also seen how Controller-Based APIs are more structured and I’ve expla
 
 It is always valuable to make time to reflect on what has been learned and practiced. Here are some of the other takeaways I have from this article:
 
-- **Always Plan Longer for Testing** - I’ve been a software engineer long enough to know this, that testing always takes longer than you expect, and here was no difference. Testing is not an afterthought and good automated tests are invaluable. Approaches such as Test Driven Design (TDD) put this front and center. While I would prefer this approach, sometimes it’s not very feasible. I was still learning while I wrote this article so it was difficult to follow a TDD but I should always remember to factor in good time for it testing and writing automated tests.
+- **Always Plan Longer for Testing** - I’ve been a software engineer long enough to know this, that testing always takes longer than you expect, and here was no difference. Testing is not an afterthought and good automated tests are invaluable. Approaches such as Test Driven Design (TDD) put this front and center. While I would prefer this approach, sometimes it’s not very feasible. I was still learning while I wrote this article so it was difficult to follow a TDD but I should always remember to factor in good time for testing and writing automated tests.
 - **Singletons!!** - The amount of time I spent while writing this article just battling an SQLite database that didn't work was exhausting. Finally, I tracked down that the database was not connected while running my requests, and then only after that did I realize that my database was being disposed off. `ServiceLifetime.Singleton` stopped it being binned and fixed all my problems. This brings me onto my last point
-- **Debugging and Docs Practice:** A large part of being a software developer is debugging—both in using the tools in your IDE to debug your code and in researching and solving problems. This article gave me great practice in breaking down problems, testing different solutions, and pushing through challenges. Additionally, reading documentation is also a core skill that always benefits from practice. Researching and reading docs, other articles, and forum posts for this article was good practice ability to find reliable sources and quickly locate the information I need.
+- **Debugging and Docs Practice:** A large part of being a software developer is debugging—both in using the tools in your IDE to debug your code, and in researching and solving problems. This article gave me great practice in breaking down problems, testing different solutions, and pushing through challenges. Additionally, reading documentation is also a core skill that always benefits from practice. Researching and reading docs, other articles, and forum posts for this article was good practice ability to find reliable sources and quickly locate the information I need.
 
 # References
 
