@@ -285,14 +285,14 @@ We have now quickly set up a CRUD API for adding songs to an SQLite database and
 ### Pros
 
 - **Faster setup:** With Minimal APIs, you can get your application up and running much faster compared to the more rigid structure of Controller-based APIs. You can skip the boilerplate code and can define routes and logic in a few lines.
-- **Lightweight for small apps:** For applications where performance and minimal overhead are essential, such as microservices, Minimal APIs are a great fit. You have access to a lot of the same features available in Controller-based APIs, but without the additional setup.
-- **Readable for simple use cases:** When dealing with just a few endpoints, having everything defined in one place can make the code easier to follow at first glance.
+- **Lightweight for small apps:** For applications where performance and minimal (no pun intented) overhead are essential, such as microservices, Minimal APIs can be a great choice. You have access to a lot of the same features available in Controller-based APIs, but without alot of the additional setup.
+- **Readable for simple use cases:** When dealing with just a few endpoints, having everything defined in one place can make the code easier to follow at a quick glance.
 
 ### Cons
 
-- **Difficulty in scaling and less structure:** As your application grows and you add more functionality, having all routes, logic, and dependencies handled in one file becomes unmanageable. Refactoring becomes harder, and keeping track of various endpoints and services can lead to a "spaghetti code" situation.
-- **Harder Dependency Injection:** Minimal APIs don’t handle dependency injection as seamlessly as Controller-based APIs. While you can inject services into endpoint handlers, it gets tricky when you need more complex dependencies. You might need to access the service provider manually or implement custom middleware, which can introduce unnecessary complexity.
-- **Limited middleware capabilities:** Minimal APIs support basic middleware, but for more advanced scenarios, like custom authentication, authorization, or complex request pipelines, Controller-based APIs might be a better fit.
+- **Difficulty in scaling and less structure:** As your application grows and you add more functionality, having all routes, logic, and dependencies handled in one file can become quite unmanageable. Refactoring becomes harder, and keeping track of various endpoints and services can lead to spaghetti code.
+- **Harder Dependency Injection:** Minimal APIs don’t handle dependency injection as seamlessly as Controller-based APIs. While you can inject services into endpoint handlers, it gets tricky when you need more complex dependencies. You might need to access the service provider manually or implement custom middleware, which can be unnecessarily complex.
+- **Limited middleware capabilities:** Minimal APIs support basic middleware, but for more complex situations, like custom authentication, authorization, or complex request pipelines, Controller-based APIs might be a better choice.
 
 # Controller Based API
 
