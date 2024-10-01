@@ -1,6 +1,6 @@
 # Comparing Minimal and Controller-Based APIs in ASP.NET
 
-When building APIs in ASP.NET Core, there are two primary approaches: **Minimal APIs** and **Controller-Based APIs**. Each has its own advantages, and choosing the right one depends on the specific project needs. Minimal APIs are ideal for lightweight, small-scale applications where simplicity and speed are important. On the other hand, Controller-based APIs provide more controll and separation of concerns, which is potentially needed for larger applications with more complex requirements.
+When building APIs in ASP.NET Core, there are two primary approaches: **Minimal APIs** and **Controller-Based APIs**. Each has its own advantages, and choosing the right one depends on the specific project needs. Minimal APIs are ideal for lightweight, small-scale applications where simplicity and speed are important. On the other hand, controller-based APIs provide more controll and separation of concerns, which is potentially needed for larger applications with more complex requirements.
 
 In this article we will walk through designing a simple CRUD RESTful API, using first the simpler approach, minimal API, then watching how as we expand the functionality of the API, a controller base API design could be preferable.
 
