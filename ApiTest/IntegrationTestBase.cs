@@ -1,14 +1,37 @@
-﻿using Shared.Data;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Shared.Data;
 using System.Net.Http.Json;
 using Xunit;
 
-public abstract class IntegrationTestBase
+public abstract class IntegrationTestBase<TProgram> : IAsyncLifetime
+    where TProgram: class
 {
     protected readonly HttpClient _client;
-
-    protected IntegrationTestBase(HttpClient client)
+    protected readonly WebApplicationFactory<TProgram> _factory;
+    protected IntegrationTestBase(WebApplicationFactory<TProgram> factory)
     {
-        _client = client;
+        _factory = factory;
+        _client = _factory.CreateClient();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await ResetDatabaseAsync();
+    }
+
+    public Task DisposeAsync()
+    {
+        _factory.Dispose();
+        return Task.CompletedTask;
+    }
+
+    private async Task ResetDatabaseAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
+        await dbContext.Database.EnsureDeletedAsync();
+        await dbContext.Database.EnsureCreatedAsync();
     }
 
 

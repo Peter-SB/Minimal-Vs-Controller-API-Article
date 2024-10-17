@@ -12,8 +12,8 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddDbContext<localDb>(opt => {
-            opt.UseSqlite("Data Source=:memory:");
-        }, ServiceLifetime.Singleton);  // Needed to keep the in memory database from being disposed
+            opt.UseSqlite("Data Source=MinimalData.db");
+        });
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         builder.Services.AddEndpointsApiExplorer();
@@ -29,7 +29,7 @@ public class Program
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
             dbContext.Database.OpenConnection();
-            dbContext.Database.EnsureCreated();  // Create the schema in the in-memory database
+            dbContext.Database.EnsureCreated();
         }
 
         if (app.Environment.IsDevelopment())
