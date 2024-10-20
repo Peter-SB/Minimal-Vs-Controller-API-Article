@@ -7,31 +7,33 @@ In this article we will walk through designing a simple CRUD RESTful API, using 
 The code for this demo can be found here: https://github.com/Peter-SB/Minimal-Vs-Controller-API-Article
 
 ---
+
 - [Comparing Minimal and Controller-Based APIs in ASP.NET](#comparing-minimal-and-controller-based-apis-in-aspnet)
 - [Minimal API](#minimal-api)
-  * [Simple CRUD API](#simple-crud-api)
-    + [Song Data Structure](#song-data-structure)
-    + [In Memory SQLite Database](#in-memory-sqlite-database)
-    + [Program.cs](#programcs)
-  * [Extending Our Minimal CRUD API Functionality](#extending-our-minimal-crud-api-functionality)
-    + [Data Structure](#data-structure)
-    + [Program.cs](#programcs-1)
-    + [Pros](#pros)
-    + [Cons](#cons)
+  - [Simple CRUD API](#simple-crud-api)
+    - [Song Data Structure](#song-data-structure)
+    - [Database Context](#database-context)
+    - [Program.cs](#programcs)
+  - [Extending Our Minimal CRUD API Functionality](#extending-our-minimal-crud-api-functionality)
+    - [Data Structure](#data-structure)
+    - [Program.cs](#programcs-1)
+    - [Pros](#pros)
+    - [Cons](#cons)
 - [Controller Based API](#controller-based-api)
-  * [Upgrading To Controller Base API](#upgrading-to-controller-base-api)
-  * [Upgrading to a Controller-Based API](#upgrading-to-a-controller-based-api)
-    + [Program.cs](#programcs-2)
-    + [Controllers](#controllers)
-    + [Pros](#pros)
-    + [Cons](#cons)
+  - [Upgrading To Controller Base API](#upgrading-to-controller-base-api)
+  - [Upgrading to a Controller-Based API](#upgrading-to-a-controller-based-api)
+    - [Program.cs](#programcs-2)
+    - [Controllers](#controllers)
+    - [Pros](#pros)
+    - [Cons](#cons)
 - [Testing](#testing)
-  * [Manual Testing With Swagger](#manual-testing-with-swagger)
-  * [Integration vs Unit Testing](#integration-vs-unit-testing)
-  * [Integration Test](#integration-test)
+  - [Manual Testing With Swagger](#manual-testing-with-swagger)
+  - [Integration vs Unit Testing](#integration-vs-unit-testing)
+  - [Integration Test](#integration-test)
 - [Quick Conclusion](#quick-conclusion)
 - [Lessons I Learned](#lessons-i-learned)
 - [References](#references)
+
 ---
 
 # Minimal API
@@ -44,7 +46,7 @@ Let’s dive into our example.
 
 ## Simple CRUD API
 
-We will start our example by building a simple CRUD API to store and retrieve songs, and then later playlists, in an inmemory SQLite database. We are going with an SQLlite in-memory database since it's lightweight, serverless, and perfect for our small-scale demonstrative purposes.
+We will start our example by building a simple CRUD API to store and retrieve songs, and then later playlists, in an SQLite database. We are going with an SQLlite database since it's lightweight, serverless, and perfect for our small-scale demonstrative purposes.
 
 ### Song Data Structure
 
@@ -61,9 +63,9 @@ public class Song
 
 (Note: `required` modifier was made available beginning with C# 11)
 
-### In Memory SQLite Database
+### Database Context
 
-We will extend the `DbContext` class from the Entity Framework Core library as our Object Relational Mapping (ORM) framework.
+We will extend the `DbContext` class for our database context. `DbContext` from the Entity Framework Core library, which is the library we will use as our Object Relational Mapping (ORM) framework. The `DbContext` represents a session with our SQLite database, allowing us to query and save data. Ie. it acts as a bridge between your code and the database.
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
@@ -73,13 +75,13 @@ public class localDb : DbContext
     public localDb(DbContextOptions<localDb> options): base(options) { }
 
     public DbSet<Song> Songs => Set<Song>();
-    public DbSet<Playlist> Playlists => Set<Playlist>(); // Used later in the article demo
+    public DbSet<Playlist> Playlists => Set<Playlist>();
 }
 ```
 
 ### Program.cs
 
-In the first section of our `Program.cs` file, we set up the web app using `WebApplication.CreateBuilder` to initialize a new instance of the `WebApplicationBuilder` class with pre-configured defaults. 
+In the first section of our `Program.cs` file, we set up the web app using `WebApplication.CreateBuilder` to initialize a new instance of the `WebApplicationBuilder` class with pre-configured defaults.
 
 The `builder.Services` gives access to the `IServiceCollection`, which is used to register services for dependency injection.
 
@@ -89,18 +91,15 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 ```
 
-Here is where we set up our SQLite database. This adds our `localDb` context to the dependency injection container and sets it up to use it in-memory.
+Here is where we set up our SQLite database. This adds our `localDb` context to the dependency injection container for use later.
 
 ```csharp
 builder.Services.AddDbContext <
   localDb >
   ((opt) => {
-    opt.UseSqlite("Data Source=:memory:");
-  },
-  ServiceLifetime.Singleton); // Needed to keep the in memory database from being disposed
+    opt.UseSqlite("Data Source=MinimalData.db");
+  });
 ```
-
-The `ServiceLifetime.Singleton` is very important, it ensures that the database context lives for the entire lifetime of the application. Without this, the in-memory database would get disposed of after each request, meaning you'd lose all data between requests. Believe me, I found this out the hard way!
 
 `builder.Build()` finalizes the `WebApplication` configurations and makes it ready to handle requests.
 
@@ -138,9 +137,11 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
     dbContext.Database.OpenConnection();
-    dbContext.Database.EnsureCreated();  // Creates the schema in the in-memory database
+    dbContext.Database.EnsureCreated();
 }
 ```
+
+The first bit retrieves an instance of the localDb context from the service provider. Then we open the connection to the SQLite database. Lastly we check whether the database exists and creates it if it doesn’t. This is useful for us to create the db automatically without running migrations.
 
 Here are our named CRUD function code for our endpoints:
 
@@ -319,10 +320,17 @@ builder.Services.AddControllers();
 
 // Same as our Minimal Api example
 builder.Services.AddDbContext<localDb>(opt => {
-    opt.UseSqlite("Data Source=:memory:");
-}, ServiceLifetime.Singleton);
+    opt.UseSqlite("Data Source=ControllerData.db");
+});
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
+    dbContext.Database.OpenConnection();
+    dbContext.Database.EnsureCreated();
+}
 
 // Middleware redirects HTTP requests to HTTPS
 app.UseHttpsRedirection();
@@ -333,13 +341,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
-    dbContext.Database.OpenConnection();
-    dbContext.Database.EnsureCreated();
-}
 ```
 
 ### Controllers
@@ -576,22 +577,47 @@ A quick note on the difference between unit testing and integration testing.
 
 No code is complete without some good unit or integration tests to quickly and repeatably ensure that your API works as expected and you’ve not introduced any bugs.
 
-Since we have two APIs that should functionally work the same, we can write a single set of integration tests to test both. We'll write these tests in a base test class, and implement specific test classes for each API. This structure allows us to avoid duplicating test logic. The base class will contain the core test logic, and each API will pass its own `HttpClient` to the base class for testing. By doing this, we ensure that both the Minimal and Controller-based APIs go through the same tests, confirming that they work identically.
+Since we have two APIs that should functionally work the same, we will write a single set of integration tests to test both for the same behavior. We'll write these tests in a base test class, and extend that for each API implementation. This structure allows us to avoid duplicating test logic. The base class will contain the core test logic, and each API will pass its own `HttpClient` to the base class for testing. By doing this, we ensure that both the Minimal and Controller-based APIs go through the same tests, confirming that they work identically.
 
-We’ll use `WebApplicationFactory` from `Microsoft.AspNetCore.Mvc.Testing` to create a test server and generate `HttpClient` instances. The `WebApplicationFactory` class mimics how the application is run in production, setting up a real test host, middleware, and dependency injection. Each specific API test class (Minimal and Controller-based) will pass its own `WebApplicationFactory` into the base class, allowing the same set of tests to be run against different implementations.
+We’ll use `WebApplicationFactory` from `Microsoft.AspNetCore.Mvc.Testing` to create a test server and generate `HttpClient` instances. The `WebApplicationFactory` class mimics how the application is run in production, setting up a real test host, middleware, and dependency injection. Each specific API test class (Minimal and Controller-based) will pass its own `WebApplicationFactory` into the base class, allowing the base class to create the client and also handle the database reset between tests.
+
+For resetting the database between tests notice we have extended the `IAsyncLifetime` interface. This interface ensures that our base test class can run asynchronous initialization and disposal logic before and after each test. The `ResetDatabaseAsync` function simply deletes the database if there is one then creates a new one.
 
 ```csharp
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Shared.Data;
 using System.Net.Http.Json;
 using Xunit;
 
-public abstract class IntegrationTestBase
+public abstract class IntegrationTestBase<TProgram> : IAsyncLifetime
+    where TProgram: class
 {
     protected readonly HttpClient _client;
-
-    protected IntegrationTestBase(HttpClient client)
+    protected readonly WebApplicationFactory<TProgram> _factory;
+    protected IntegrationTestBase(WebApplicationFactory<TProgram> factory)
     {
-        _client = client;
+        _factory = factory;
+        _client = _factory.CreateClient();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await ResetDatabaseAsync();
+    }
+
+    public Task DisposeAsync()
+    {
+        _factory.Dispose();
+        return Task.CompletedTask;
+    }
+
+    private async Task ResetDatabaseAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<localDb>();
+        await dbContext.Database.EnsureDeletedAsync();
+        await dbContext.Database.EnsureCreatedAsync();
     }
 
     [Fact]
@@ -637,18 +663,18 @@ public abstract class IntegrationTestBase
 Now that we have a base class for integration testing, we can create separate test classes for the Minimal API and the Controller-based API:
 
 ```csharp
-public class MinimalApiIntegrationTests : IntegrationTestBase
+public class MinimalApiIntegrationTests : IntegrationTestBase<MinimalApi.Program>
 {
     public MinimalApiIntegrationTests()
-        : base(new WebApplicationFactory<MinimalApi.Program>().CreateClient())
+        : base(new WebApplicationFactory<MinimalApi.Program>())
     {
     }
 }
 
-public class ControllerBasedApiIntegrationTests : IntegrationTestBase
+public class ControllerBasedApiIntegrationTests : IntegrationTestBase<ControllerApi.Program>
 {
     public ControllerBasedApiIntegrationTests()
-        : base(new WebApplicationFactory<ControllerApi.Program>().CreateClient())
+        : base(new WebApplicationFactory<ControllerApi.Program>())
     {
     }
 }
@@ -665,8 +691,8 @@ We’ve also seen how Controller-Based APIs are more structured and I’ve expla
 
 It is always valuable to make time to reflect on what has been learned and practiced. Here are some of the other takeaways I have from this article:
 
-- **Always Plan Longer for Testing** - I’ve been a software engineer long enough to know this, that testing always takes longer than you expect, and here was no difference. Testing is not an afterthought and good automated tests are invaluable. Approaches such as Test Driven Design (TDD) put this front and center. While I would prefer this approach, sometimes it’s not very feasible. I was still learning while I wrote this article so it was difficult to follow a TDD but I should always remember to factor in good time for testing and writing automated tests.
-- **Singletons!!** - The amount of time I spent while writing this article just battling an SQLite database that didn't work was exhausting. Finally, I tracked down that the database was not connected while running my requests, and then only after that did I realize that my database was being disposed off. `ServiceLifetime.Singleton` stopped it being binned and fixed all my problems. This brings me onto my last point
+- **Always Plan Longer for Testing** - I’ve been a software engineer long enough to know, that testing always takes longer than you expect, and here was no difference. Testing is not an afterthought and good automated tests are invaluable. Approaches such as Test Driven Design (TDD) put this front and center. While I would prefer this approach, sometimes it’s not very feasible. I was still learning while I wrote this article so it was difficult to follow a TDD but I should always remember to factor in good time for testing and writing automated tests.
+- **Importance of Lifecycles** Initially I aimed to use an SQLite in-memory database because, being just a demonstration, the database didn't need to be save. This wasn't working at first because the SQLite in-memory database is tied to the lifecycle of the request connection, once the request is completed and the connection is closed and the database is disposed of losing all stored data between requests. I got around this by making the connection a singleton with `ServiceLifetime.Singleton`. However, I learned this had the potential to introduce serious threading issues. SQLite's default mode is not inherently thread-safe, and using a single shared instance across multiple requests could lead to data corruption, race conditions, or unexpected behavior, especially when multiple concurrent operations are performed such as in an API. So then I decided to switch to the SQLite database file allowing each request to maintain a separate connection. I could have pretended to know better but I thought explain so you can learn too.
 - **Debugging and Docs Practice:** A large part of being a software developer is debugging—both in using the tools in your IDE to debug your code, and in researching and solving problems. This article gave me great practice in breaking down problems, testing different solutions, and pushing through challenges. Additionally, reading documentation is also a core skill that always benefits from practice. Researching and reading docs, other articles, and forum posts for this article was good practice ability to find reliable sources and quickly locate the information I need.
 
 # References
