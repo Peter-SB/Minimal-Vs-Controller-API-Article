@@ -4,8 +4,7 @@ When building APIs in ASP.NET Core, there are two primary approaches: **Minimal 
 
 In this article we will walk through designing a simple CRUD RESTful API, using first the simpler approach, minimal API, then watching how as we expand the functionality of the API, a controller base API design could be preferable.
 
-The code for this demo can be found here: https://github.com/Peter-SB/Minimal-Vs-Controller-API-Article
-The formatted version on Medium can be found here: https://medium.com/@petersembou/comparing-minimal-and-controller-based-apis-in-asp-net-6f0fc1dec078
+The formatted version on Medium can be found [Here](https://medium.com/@petersembou/comparing-minimal-and-controller-based-apis-in-asp-net-6f0fc1dec078)
 
 ---
 
