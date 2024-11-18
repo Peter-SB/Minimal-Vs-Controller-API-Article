@@ -40,13 +40,13 @@ The code for this demo can be found here: https://github.com/Peter-SB/Minimal-Vs
 
 Minimal APIs were introduced in ASP.NET Core 6.0 as a way to build HTTP APIs with less boilerplate code. They’re perfect for small, simple applications or microservices, where you don't need the normal overhead of MVC (Model-View-Controller) patterns.
 
-The main purpose of Minimal APIs is to simplify development by allowing you to write API endpoints quickly and without the need for controllers. It focuses on keeping the setup minimal, allowing to do everything directly in the `Program.cs` file. While this can reduce code complexity in small apps, the structure might not scale well as we will see shortly.
+The main purpose of Minimal APIs is to simplify development by allowing you to write API endpoints quickly and without the need for controllers. It focuses on keeping the setup minimal, allowing you to do everything directly in the `Program.cs` file. While this can reduce code complexity in small apps, the structure might not scale well as we will see shortly.
 
 Let’s dive into our example.
 
 ## Simple CRUD API
 
-We will start our example by building a simple CRUD API to store and retrieve songs, and then later playlists, in an SQLite database. We are going with an SQLlite database since it's lightweight, serverless, and perfect for our small-scale demonstrative purposes.
+We will start our example by building a simple CRUD API to store and retrieve songs, and then later playlists, in an SQLite database. We are going with an SQLite database since it's lightweight, serverless, and perfect for our small-scale demonstrative purposes.
 
 ### Song Data Structure
 
