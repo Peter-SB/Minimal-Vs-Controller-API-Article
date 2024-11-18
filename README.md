@@ -94,11 +94,9 @@ var builder = WebApplication.CreateBuilder(args);
 Here is where we set up our SQLite database. This adds our `localDb` context to the dependency injection container for use later.
 
 ```csharp
-builder.Services.AddDbContext <
-  localDb >
-  ((opt) => {
+builder.Services.AddDbContext<localDb>(opt => {
     opt.UseSqlite("Data Source=MinimalData.db");
-  });
+});
 ```
 
 `builder.Build()` finalizes the `WebApplication` configurations and makes it ready to handle requests.
